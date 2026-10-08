@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Shared support code: configuration, the one wait helper, the WebDriver lifecycle and
+    failure-artefact capture. Core has NO project reference and NO test runner reference,
+    which keeps the dependency direction one-way: tests/* -> src/* -> Core.
+
+    Package versions are pinned centrally in Directory.Packages.props, so no
+    PackageReference below carries a Version attribute.
+  -->
+  <PropertyGroup>
+    <RootNamespace>QAAutomation.Core</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Selenium.WebDriver" />
+    <PackageReference Include="Selenium.Support" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The settings file travels with the build output of anything that uses Core. -->
+    <None Include="Configuration\appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

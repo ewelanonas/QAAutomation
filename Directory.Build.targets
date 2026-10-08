@@ -1,0 +1,57 @@
+<Project>
+
+  <!--
+    The mechanical no-LINQ signal.
+
+    .kiro/steering/code-style.md bans LINQ. An .editorconfig cannot ban a namespace, and
+    BannedApiAnalyzers would mean adding a package that tech-stack.md has not sanctioned.
+    So this target greps the hand-written source files of each project for the using
+    directive and raises an MSBuild WARNING naming the offending files.
+
+    It is a warning on purpose. It must never fail the build: a red build with no product
+    reason costs a team more than a style slip does. If the warning ever needs to become an
+    error, that is a deliberate decision to record in tech-stack.md first.
+
+    LIMITATION - THIS GUARD IS WINDOWS-ONLY. findstr is a Windows command, so the target is
+    gated on Windows_NT and simply does not run on a Linux or macOS agent. On those machines
+    the no-LINQ rule is enforced by review alone, and there is no warning to say so. Nothing
+    is broken by that today: the only machines this repository builds on are Windows, and CI
+    is parked. Two ways out when that changes, in order of preference:
+      1. Take Microsoft.CodeAnalysis.BannedApiAnalyzers (pin it in Directory.Packages.props
+         first). It is cross-platform, it reports through the compiler, and it can name a
+         method rather than a namespace. This is the real answer.
+      2. Keep the grep but make it portable - an inline MSBuild task reading each file, or a
+         small script invoked per platform. Cheaper, and it keeps a shell dependency.
+    Do not solve it by removing the Windows condition: findstr fails on a non-Windows agent,
+    and ContinueOnError would turn that into a silent pass that looks like enforcement.
+  -->
+  <Target Name="WarnOnLinqUsage"
+          AfterTargets="Build"
+          Condition="'$(OS)' == 'Windows_NT'">
+
+    <ItemGroup>
+      <!--
+        Generated code is not ours to judge. Refit generates into obj/, and Reqnroll writes a
+        .feature.cs next to every .feature file, so both are excluded here. Without the
+        .feature.cs exclusion a future generator that emits "using System.Linq" would raise a
+        warning naming a file nobody is allowed to edit.
+      -->
+      <HandWrittenSource Include="@(Compile)"
+                         Exclude="$(BaseIntermediateOutputPath)**\*.cs;obj\**\*.cs;bin\**\*.cs;**\*.feature.cs" />
+    </ItemGroup>
+
+    <Exec Command="findstr /M /C:&quot;using System.Linq&quot; @(HandWrittenSource->'&quot;%(FullPath)&quot;', ' ')"
+          Condition="'@(HandWrittenSource)' != ''"
+          ContinueOnError="true"
+          IgnoreExitCode="true"
+          StandardOutputImportance="low"
+          ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" ItemName="LinqOffender" />
+    </Exec>
+
+    <Warning Condition="'@(LinqOffender)' != ''"
+             Text="LINQ is banned in this repository. Replace it with a plain foreach loop and a named local. See .kiro/steering/code-style.md. Offending file(s): @(LinqOffender, ' | ')" />
+
+  </Target>
+
+</Project>

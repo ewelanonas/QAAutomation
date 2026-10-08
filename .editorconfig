@@ -1,0 +1,61 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{feature,json,yml,yaml,md}]
+indent_size = 2
+
+[*.cs]
+# code-style.md wants explicit types, so every "var" preference is off.
+# Severity is suggestion rather than warning on purpose: the one allowed form,
+# var x = new Foo(), would otherwise be reported as a style violation on every build.
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = false:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# An abandoned using directive is the first sign that a LINQ chain was half-removed.
+dotnet_diagnostic.IDE0005.severity = warning
+
+# Private field naming. code-style.md does not name a convention, so the repository settled
+# on one: plain camelCase, read through this. (this.driver, this.waits), never _underscore.
+# A template teaches by example, so the convention is written down mechanically here rather
+# than left to whoever writes the next file.
+#
+# Constants and static fields keep PascalCase, which is what they already use
+# (SuiteName, CloseButton). Their rules come first because the first matching rule wins.
+dotnet_naming_rule.private_constants_are_pascal_case.severity = warning
+dotnet_naming_rule.private_constants_are_pascal_case.symbols = private_constant_fields
+dotnet_naming_rule.private_constants_are_pascal_case.style = pascal_case_style
+
+dotnet_naming_rule.private_static_fields_are_pascal_case.severity = warning
+dotnet_naming_rule.private_static_fields_are_pascal_case.symbols = private_static_fields
+dotnet_naming_rule.private_static_fields_are_pascal_case.style = pascal_case_style
+
+dotnet_naming_rule.private_instance_fields_are_camel_case.severity = warning
+dotnet_naming_rule.private_instance_fields_are_camel_case.symbols = private_instance_fields
+dotnet_naming_rule.private_instance_fields_are_camel_case.style = camel_case_style
+
+dotnet_naming_symbols.private_constant_fields.applicable_kinds = field
+dotnet_naming_symbols.private_constant_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_constant_fields.required_modifiers = const
+
+dotnet_naming_symbols.private_static_fields.applicable_kinds = field
+dotnet_naming_symbols.private_static_fields.applicable_accessibilities = private
+dotnet_naming_symbols.private_static_fields.required_modifiers = static
+
+dotnet_naming_symbols.private_instance_fields.applicable_kinds = field
+dotnet_naming_symbols.private_instance_fields.applicable_accessibilities = private
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+[*.feature.cs]
+# Reqnroll writes one of these next to every .feature file at build time. They are listed in
+# .gitignore. Never commit them, never hand-edit them, and never judge them by house style.
+generated_code = true

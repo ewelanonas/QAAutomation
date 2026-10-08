@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The UI suite. References Core and UI. It must never reference another test project.
+  -->
+  <PropertyGroup>
+    <RootNamespace>QAAutomation.Tests.UI</RootNamespace>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\QAAutomation.Core\QAAutomation.Core.csproj" />
+    <ProjectReference Include="..\..\src\QAAutomation.UI\QAAutomation.UI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="NUnit3TestAdapter" />
+    <PackageReference Include="Reqnroll.NUnit" />
+    <PackageReference Include="Reqnroll.Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Linked explicitly rather than relying on content flowing transitively from Core,
+      so the settings file lands in this project's output every time.
+    -->
+    <None Include="..\..\src\QAAutomation.Core\Configuration\appsettings.json"
+          Link="appsettings.json"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

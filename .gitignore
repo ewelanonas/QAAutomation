@@ -1,0 +1,22 @@
+# Build output
+bin/
+obj/
+
+# Test output and failure artefacts. Runtime only, never committed.
+test-results/
+TestResults/
+*.trx
+
+# Reporting output (Allure is reserved, not active yet)
+allure-results/
+
+# Reqnroll writes one of these next to every .feature file at build time. They are
+# generated code: never edit them, never commit them.
+*.feature.cs
+# Local editor and user files
+*.user
+.vs/
+
+# Agent workflow artefacts (design docs, plans, review reports). Internal process
+# output, not part of the template.
+.agents/

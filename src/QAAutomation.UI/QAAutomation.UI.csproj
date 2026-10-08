@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Page objects and page components. Synchronous, because Selenium's C# API is synchronous.
+    References Core only. No test runner, no assertions.
+  -->
+  <PropertyGroup>
+    <RootNamespace>QAAutomation.UI</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QAAutomation.Core\QAAutomation.Core.csproj" />
+  </ItemGroup>
+
+</Project>

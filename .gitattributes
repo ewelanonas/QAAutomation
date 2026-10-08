@@ -1,0 +1,25 @@
+# Normalise line endings so the repository stays clean across Windows dev machines
+# and Linux CI agents. Without this, a Linux build agent produces a whole-file diff
+# on every text file it touches.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF so they run correctly when checked out on Windows.
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.bat  text eol=crlf
+
+# Binary files git must never try to normalise.
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.dll  binary
+*.exe  binary
+*.snk  binary
+
+# Keep generated Reqnroll code out of diffs if one is ever committed by accident.
+*.feature.cs linguist-generated=true
+
+# Help GitHub report the language mix correctly: these are docs, not source.
+*.md         linguist-documentation=true

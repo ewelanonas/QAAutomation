@@ -1,0 +1,42 @@
+<Project>
+
+  <!--
+    Shared build settings for every project in this repository.
+    MSBuild imports this file automatically, so no project has to opt in.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+
+    <!--
+      ImplicitUsings is deliberately disabled. The SDK's implicit using set includes
+      System.Linq, which would silently re-enable the one construct .kiro/steering/code-style.md
+      bans outright. Explicit using directives also make every file readable on its own.
+    -->
+    <ImplicitUsings>disable</ImplicitUsings>
+
+    <!--
+      Nullable is deliberately disabled. The house style in code-style.md assigns null to
+      plain local variables on purpose, and a template that warns about its own documented
+      style teaches noise rather than the rule.
+    -->
+    <Nullable>disable</Nullable>
+
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <IsPackable>false</IsPackable>
+
+    <!--
+      Roslyn only runs IDE0005 (unused using directive) during a build when a documentation
+      file is generated. .editorconfig asks for IDE0005 as a warning, because a leftover using
+      is the first sign that a LINQ chain was only half removed, so the documentation file has
+      to be switched on for that to work.
+
+      CS1591 is suppressed in the same breath: requiring an XML comment on every public member
+      of a test framework would be busywork, and the comments that matter are already there.
+    -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+</Project>

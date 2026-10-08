@@ -1,0 +1,50 @@
+<Project>
+
+  <!--
+    Central Package Management. Every package version in this repository lives here and
+    nowhere else. A PackageReference in a .csproj must have NO Version attribute, or the
+    restore fails with NU1008.
+
+    Do not add a package here without a decision recorded in .kiro/steering/tech-stack.md.
+    Reserved packages (WireMock.Net, Testcontainers.PostgreSql, Npgsql, Respawn, Bogus,
+    Polly, Allure.Reqnroll, Reqnroll.Verify, RestSharp) stay unpinned until they are
+    actually activated. Never add Selenium.WebDriver.ChromeDriver, WebDriverManager,
+    DotNetSeleniumExtras.WaitHelpers or FluentAssertions.
+  -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <ItemGroup Label="BDD runner and unit test framework">
+    <PackageVersion Include="Reqnroll" Version="3.3.4" />
+    <PackageVersion Include="Reqnroll.NUnit" Version="3.3.4" />
+    <PackageVersion Include="Reqnroll.Microsoft.Extensions.DependencyInjection" Version="3.3.4" />
+    <PackageVersion Include="NUnit" Version="4.6.1" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.3.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+  </ItemGroup>
+
+  <ItemGroup Label="Browser automation">
+    <PackageVersion Include="Selenium.WebDriver" Version="4.50.0" />
+    <PackageVersion Include="Selenium.Support" Version="4.50.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Assertions">
+    <PackageVersion Include="AwesomeAssertions" Version="9.6.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="REST client">
+    <PackageVersion Include="Refit" Version="16.3.0" />
+    <PackageVersion Include="Refit.HttpClientFactory" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Configuration and dependency injection">
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.12" />
+  </ItemGroup>
+
+</Project>
