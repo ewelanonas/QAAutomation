@@ -17,6 +17,11 @@ allure-results/
 *.user
 .vs/
 
-# Agent workflow artefacts (design docs, plans, review reports). Internal process
-# output, not part of the template.
-.agents/
+# Agent workflow artefacts (.agents/) ARE committed on purpose. The design doc,
+# implementation plan and review reports explain why this framework is shaped the
+# way it is, and they are reusable as templates on the next project. They are
+# documentation of the build, not build output.
+#
+# Before committing anything new under .agents/, check it for credentials: review
+# reports quote source and configuration, so a real key could be carried in by
+# accident. Placeholders such as YOUR_API_KEY_HERE only.

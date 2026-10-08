@@ -1,0 +1,7 @@
+{
+  "task_id": "task-selenium-bdd-template",
+  "task_description": "Build a working, compiling, passing C# BDD test automation template in d:\\git\\QAAutomation using Reqnroll 3.3.4 on NUnit 4.6.1, Selenium WebDriver 4.50.0 for UI, Refit 16.3.0 for API, and AwesomeAssertions 9.6.0, structured exactly as .kiro/steering/project-structure.md prescribes. Three suites (UI, API, E2E) run against Landmark Systems' public marketing website and its public WordPress REST API, which stand in for KEYinfinity. The audience is a QA engineer who is not an experienced C# developer, so .kiro/steering/code-style.md is binding: no LINQ, explicit types, guard clauses, named constants, full words, foreach loops, DAMP over DRY. The site is production and read-only: the contact form is never submitted and no live content count is ever hard-asserted. Deliverables also include .editorconfig plus an MSBuild warning on System.Linq usage, and a deliberately basic UK-English README. No pipelines folder - CI is parked. The workspace is NOT a git repository: never run git init and never commit.",
+  "status": "completed",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003", "FEAT-004"],
+  "blocked_reason": null
+}
