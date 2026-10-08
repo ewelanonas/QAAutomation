@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Scan .agents artefacts for credentials",
+      "trigger": "PostFileCreate",
+      "description": "Scans the .agents folder for credential-shaped values as soon as a new artefact is written there, so a leak is caught at write time rather than at commit time.",
+      "matcher": "\\.agents[\\\\/]",
+      "action": {
+        "type": "command",
+        "command": "powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"d:\\git\\QAAutomation\\scripts\\Find-StagedSecrets.ps1\" -Scope Path -Path \"d:\\git\\QAAutomation\\.agents\"",
+        "timeout": 60
+      }
+    }
+  ]
+}

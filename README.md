@@ -423,6 +423,53 @@ demonstrate the override.
 
 Nothing in this repository ever logs an authorisation header, a cookie value or personal data.
 
+#### This rule is enforced by a hook, not by memory
+
+`.agents/` is committed on purpose, and those review reports quote source code and
+configuration. That is a realistic route for a real key to reach the repository by accident,
+so the rule is mechanical rather than a matter of remembering.
+
+`scripts/Find-StagedSecrets.ps1` scans **staged** content for credential-shaped values and
+`.githooks/pre-commit` runs it on every commit. A finding blocks the commit.
+
+```powershell
+# Scan what you are about to commit (this is what the hook runs).
+powershell -NoProfile -File .\scripts\Find-StagedSecrets.ps1
+
+# Audit everything already committed.
+powershell -NoProfile -File .\scripts\Find-StagedSecrets.ps1 -Scope Tracked
+
+# Scan a folder in the working copy.
+powershell -NoProfile -File .\scripts\Find-StagedSecrets.ps1 -Scope Path -Path .agents
+```
+
+**After cloning, activate the hook once.** Git does not install committed hooks for you, so
+until you run one of these, nothing is checking your commits:
+
+```powershell
+git config core.hooksPath .githooks
+git config --get core.hooksPath          # should print .githooks
+```
+
+Three things worth knowing about how it behaves:
+
+| Behaviour | Why |
+| --- | --- |
+| Matched values are **masked** in the output (`ghp_********r8`) | Printing a secret copies it into your terminal history and, in CI, into the build log — the very thing the scanner exists to prevent. |
+| A placeholder is a **pass**, not a finding | `YOUR_API_KEY_HERE` is the correct thing to commit. The check tests the matched value itself, not the whole line, so a real token is not excused by the word "example" appearing elsewhere on the line. |
+| If the scanner cannot run, the commit is **blocked** (exit 2) | A security check that errors must fail closed. An unexplained pass is worse than a stopped commit. |
+
+It scans for GitHub and cloud provider keys, JWTs, bearer and basic auth values, private key
+blocks, passwords inside connection strings and URLs, and secret-shaped assignments. It is
+calibrated against this repository: 112 tracked files, zero findings, while catching all eight
+shapes in its test fixture.
+
+`git commit --no-verify` skips it. That exists for a genuine emergency, not for a Tuesday. If
+a finding is a false positive, widen the allow-list in the script so the next person benefits.
+
+**If a real credential was ever pushed, rotate it.** Deleting the line in a later commit does
+not remove it from the history, and the history is what an attacker reads.
+
 ### Assertions live in steps only
 
 An **assertion** is the line that decides whether a test passes — here written with

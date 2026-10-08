@@ -16,6 +16,7 @@ allure-results/
 # Local editor and user files
 *.user
 .vs/
+.idea/
 
 # Agent workflow artefacts (.agents/) ARE committed on purpose. The design doc,
 # implementation plan and review reports explain why this framework is shaped the

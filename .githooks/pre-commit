@@ -1,0 +1,51 @@
+#!/bin/sh
+#
+# Blocks a commit that would publish a credential.
+#
+# This exists because .agents/ is committed on purpose. Those review reports and
+# plans quote source code and configuration, so a real key can be carried into the
+# repository by accident. Reviewer memory is not a control; this is.
+#
+# Activate it once per clone:
+#     git config core.hooksPath .githooks
+#
+# Check it is active:
+#     git config --get core.hooksPath      # should print .githooks
+#
+# Deactivate:
+#     git config --unset core.hooksPath
+#
+# The hook is committed rather than left in .git/hooks so that it survives a clone
+# and so that changes to it are reviewed like any other code.
+
+set -e
+
+SCANNER="scripts/Find-StagedSecrets.ps1"
+
+if [ ! -f "$SCANNER" ]; then
+    echo "pre-commit: cannot find $SCANNER" >&2
+    echo "pre-commit: failing closed - a security check that cannot run must block." >&2
+    exit 1
+fi
+
+# PowerShell 7+ is 'pwsh'. Windows PowerShell 5.1 is 'powershell'. Accept either.
+if command -v pwsh >/dev/null 2>&1; then
+    SHELL_CMD="pwsh"
+elif command -v powershell >/dev/null 2>&1; then
+    SHELL_CMD="powershell"
+else
+    echo "pre-commit: neither 'pwsh' nor 'powershell' is on PATH." >&2
+    echo "pre-commit: failing closed. Install PowerShell, or bypass deliberately with" >&2
+    echo "            'git commit --no-verify' if you have checked the diff yourself." >&2
+    exit 1
+fi
+
+"$SHELL_CMD" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$SCANNER" -Scope Staged
+SCAN_STATUS=$?
+
+if [ $SCAN_STATUS -ne 0 ]; then
+    echo "pre-commit: commit blocked by the secret scan (exit $SCAN_STATUS)." >&2
+    exit $SCAN_STATUS
+fi
+
+exit 0
