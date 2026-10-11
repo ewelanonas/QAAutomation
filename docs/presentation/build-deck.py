@@ -1097,7 +1097,7 @@ def slide_today(prs):
 
     shape(slide, MARGIN + 6.11, 3.7, 5.72, 2.95, fill=WASH, line=BORDER)
     textbox(
-        slide, MARGIN + 6.51, 3.98, 5.0, 0.3, "AND BE CLEAR ABOUT THIS", size=10.5, bold=True, color=AMBER
+        slide, MARGIN + 6.51, 3.98, 5.0, 0.3, "WHAT TODAY'S RUN PROVES", size=10.5, bold=True, color=TEAL
     )
     textbox(
         slide,
@@ -1106,8 +1106,8 @@ def slide_today(prs):
         4.92,
         2.0,
         "It runs against a public marketing website, standing in for KEYinfinity until that is available.\n\n"
-        "Every request is read-only. Nothing is created, changed or submitted.\n\n"
-        "It proves the framework works end to end. It does not yet prove anything about our product.",
+        "Every request is read-only, so the suite is safe to run at any time.\n\n"
+        "That proves the framework itself works end to end. Proving our own product starts in Phase 3.",
         size=12.5,
         color=GREY,
         line_spacing=1.35,
@@ -1308,7 +1308,7 @@ def slide_needs(prs):
 
 def slide_limits(prs):
     slide = new_slide(prs)
-    header(slide, "honesty", "What this does not do yet", 15)
+    header(slide, "scope", "Deliberate boundaries, and when they lift", 15)
 
     textbox(
         slide,
@@ -1316,34 +1316,34 @@ def slide_limits(prs):
         1.68,
         CONTENT_W,
         0.42,
-        "Stated plainly, so nobody discovers it later and reasonably asks why they were not told.",
+        "Each of these is a choice with a known trigger for revisiting it, rather than an oversight.",
         size=16,
         color=GREY,
     )
 
     items = [
         (
-            "No login, tenants or database in the stand-in site",
-            "So nothing here demonstrates authentication, tenant isolation or data setup. Those are real KEYinfinity concerns and they are not faked.",
+            "Authentication and tenant isolation",
+            "The stand-in site has no login, tenants or database, so these cannot be shown yet. They arrive with KEYinfinity access, in Phase 3.",
         ),
         (
-            "No build pipeline yet",
-            "Parked deliberately while the suite settled. The conventions are already written down, so wiring it up is configuration rather than design.",
+            "The build pipeline",
+            "Parked deliberately while the suite settled. The conventions are already written down, so Phase 2 is configuration rather than design.",
         ),
         (
-            "Chrome only",
-            "Any other browser fails with a clear configuration error. Adding Edge or Firefox is a later, deliberate decision.",
+            "Chrome only, for now",
+            "A deliberate single-browser start. Any other browser fails with a clear configuration error, so adding Edge or Firefox is a scoped change.",
         ),
         (
-            "Live third-party content is a standing fragility",
-            "Expected page titles and link names are marketing copy, not contract. They are concentrated in one settings file so a copy change is a one-line edit.",
+            "Live third-party content",
+            "Expected page titles and link names are marketing copy, not contract. They sit in one settings file, so a copy change is a one-line edit.",
         ),
     ]
 
     top = 2.35
     for name, detail in items:
         shape(slide, MARGIN, top, CONTENT_W, 1.02, fill=WHITE, line=BORDER)
-        shape(slide, MARGIN + 0.35, top + 0.36, 0.3, 0.3, fill=AMBER, kind=MSO_SHAPE.OVAL)
+        shape(slide, MARGIN + 0.35, top + 0.36, 0.3, 0.3, fill=TEAL, kind=MSO_SHAPE.OVAL)
         textbox(slide, MARGIN + 0.92, top + 0.16, 10.6, 0.3, name, size=14.5, bold=True, color=NAVY)
         textbox(
             slide,
