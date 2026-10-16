@@ -43,6 +43,7 @@ namespace QAAutomation.Core.Configuration
             testConfiguration.Api = ReadApiOptions(configuration);
             testConfiguration.Site = ReadSiteOptions(configuration);
             testConfiguration.Artefacts = ReadArtefactOptions(configuration);
+            testConfiguration.Database = ReadDatabaseOptions(configuration);
 
             return testConfiguration;
         }
@@ -105,6 +106,24 @@ namespace QAAutomation.Core.Configuration
             return options;
         }
 
+        private static DatabaseOptions ReadDatabaseOptions(IConfigurationRoot configuration)
+        {
+            DatabaseOptions options = new DatabaseOptions();
+            options.Provider = ReadDatabaseProvider(configuration, "Database:Provider");
+
+            // Read as optional on purpose. The committed appsettings.json carries an empty string,
+            // because the real connection string is a secret supplied at run time through
+            // QAAUTOMATION_Database__ConnectionString. Presence is validated later, by the
+            // connection factory, with a message that names that env var.
+            options.ConnectionString = ReadOptionalText(configuration, "Database:ConnectionString");
+
+            options.CommandTimeoutSeconds = ReadWholeNumber(configuration, "Database:CommandTimeoutSeconds");
+
+            RequireSensibleTimeout("Database:CommandTimeoutSeconds", options.CommandTimeoutSeconds);
+
+            return options;
+        }
+
         private static string ReadRequiredText(IConfigurationRoot configuration, string configurationKey)
         {
             string value = configuration.GetSection(configurationKey).Value;
@@ -120,6 +139,31 @@ namespace QAAutomation.Core.Configuration
             }
 
             return trimmedValue;
+        }
+
+        private static string ReadOptionalText(IConfigurationRoot configuration, string configurationKey)
+        {
+            string value = configuration.GetSection(configurationKey).Value;
+            if (value == null)
+            {
+                return string.Empty;
+            }
+
+            return value.Trim();
+        }
+
+        private static DatabaseProvider ReadDatabaseProvider(IConfigurationRoot configuration, string configurationKey)
+        {
+            string value = ReadRequiredText(configuration, configurationKey);
+
+            DatabaseProvider parsedProvider;
+            bool parsed = Enum.TryParse<DatabaseProvider>(value, ignoreCase: true, out parsedProvider);
+            if (parsed == false)
+            {
+                throw TestConfigurationException.ForKey(configurationKey, "expected Postgres or SqlServer", value);
+            }
+
+            return parsedProvider;
         }
 
         private static int ReadWholeNumber(IConfigurationRoot configuration, string configurationKey)

@@ -28,6 +28,10 @@ Two sections follow. **Active** packages are the ones the current template uses.
 | REST client — DI registration | `Refit.HttpClientFactory` | 16.3.0 | `api-automation.md` §1.4 mandates `IHttpClientFactory` registration rather than `RestService.For<T>()`, and this package supplies the `IServiceCollection` extension that does it. |
 | HTTP client factory | `Microsoft.Extensions.Http` | 10.0.12 | The `IHttpClientFactory` implementation itself, plus the `DelegatingHandler` pipeline the correlation-id handler plugs into. Matches the `net10.0` TFM. |
 | DI abstractions | `Microsoft.Extensions.DependencyInjection.Abstractions` | 10.0.12 | `QAAutomation.Core` exposes `IServiceCollection` registration extensions, and `Core` takes no runner reference, so it needs the abstractions package directly. |
+| Data access — PostgreSQL | `Npgsql` | 10.0.3 | Driver behind `QAAutomation.Data` for PostgreSQL, KEYinfinity's documented primary engine. Reached only through the `System.Data.Common` seam, so no step or client names it. See the data-access decision note below. |
+| Data access — SQL Server | `Microsoft.Data.SqlClient` | 7.1.0 | Driver behind `QAAutomation.Data` for SQL Server, added on request for portability. Current GA (Sept 2026); restores and builds cleanly on `net10.0`. |
+| DB reset between scenarios | `Respawn` | 7.0.0 | Deterministic delete-based reset between `@database` scenarios. Adapter chosen from `DatabaseOptions.Provider`; built once per run via the singleton `DatabaseResetter`. |
+| Transitive security pin | `System.Security.Cryptography.Pkcs` | 10.0.13 | Not referenced directly. `Microsoft.Data.SqlClient` 7.1.0 drags in 9.0.18, flagged NU1902/NU1903 (CVE-2026-84008); the `net10.0` line is first patched at 10.0.13. Central transitive pinning forces the whole graph onto it, clearing both warnings. |
 
 Refit 16 registers through `services.AddRefitGeneratedClient<T>()`. Do **not** use `AddRefitClient<T>()` — it compiles but fails at run time demanding the separate `Refit.Reflection` package, which is not pinned here.
 
@@ -58,17 +62,34 @@ Selenium Manager is built into Selenium 4.6+ and resolves and downloads the matc
 | `WebDriverManager` | 2.17.7 | Not needed, same reason. It predates Selenium Manager and now duplicates it. |
 | `DotNetSeleniumExtras.WaitHelpers` | 3.11.0 | **Abandoned** — exactly one release, ever. It is the old `ExpectedConditions` helper that was removed from Selenium in v4. Do not take a dependency on it. Write one small wait helper in `src/QAAutomation.Core/Utilities` built on `WebDriverWait` with a `Until(driver => ...)` lambda instead. That lambda is permitted under exception 2 in #[[file:code-style.md]] — `Until` accepts nothing else. |
 
+## Decision — provider-agnostic data access (`QAAutomation.Data`)
+
+Added on request so an interview can show where database validation lives. The system under test is still the public marketing website with no database, so this is **scaffolding**: it builds and demonstrates the shape, and its one example scenario is `@ignore`, so nothing connects in the default `dotnet test` run.
+
+The design is provider-agnostic over `System.Data.Common` and supports **both** engines, selected by `DatabaseOptions.Provider` (env var `QAAUTOMATION_Database__Provider`):
+
+- **PostgreSQL (`Npgsql` 10.0.3) remains KEYinfinity's documented primary engine.** It matches the PostgreSQL + Kubernetes reality of the product.
+- **SQL Server (`Microsoft.Data.SqlClient` 7.1.0) was added on request for portability.** It is the current GA (Sept 2026) and restores and builds cleanly on `net10.0`, so no step-down was needed.
+- `Respawn` 7.0.0 resets state between `@database` scenarios; its `DbAdapter` is chosen from the same `Provider` enum.
+
+Why a separate `QAAutomation.Data` project: the database drivers stay out of `Core` and `UI`. Only the project that needs a driver takes the dependency, and only the suites that opt in (API, E2E) register it — the UI suite cannot open a connection because it never references the project. `DatabaseOptions` itself is a POCO in `Core` (no driver reference), so configuration stays in one place.
+
+Security pin that came with it: `Microsoft.Data.SqlClient` 7.1.0 pulls in `System.Security.Cryptography.Pkcs` 9.0.18, which NuGet flags NU1902 (moderate) and NU1903 (high) — CVE-2026-84008. Per the advisory the `net10.0` line is vulnerable through 10.0.12 and first patched at **10.0.13**, so that is pinned as a transitive security pin. The repo bar is zero warnings, so this is cleared, not tolerated.
+
+Testcontainers was **not** activated. `Testcontainers.PostgreSql` and `Testcontainers.MsSql` (both 4.15.0) stay reserved: there is no container-based integration test to run yet, and pinning unused packages only adds transitive surface and warning risk. They come back with the first ephemeral-database test.
+
 ## Reserved — not used in the current template
 
 These keep their pins and their rationale, because they are still the right choices for KEYinfinity. They are **not** in the current template.
 
 Why: the current target is a **public marketing website**. No database, no tenancy, no third-party dependency to stub. Wiring these in now would add weight and setup cost while teaching nothing, and a template nobody can read end to end in one sitting does not get used. Each one comes back the moment the thing it exists for exists.
 
+(One exception, on request: the data-access layer `QAAutomation.Data` was activated as scaffolding — see the decision note above. `Npgsql`, `Microsoft.Data.SqlClient` and `Respawn` are now Active; the Testcontainers rows below stay reserved.)
+
 | Concern | Choice | Pinned version | Bring back when |
 | --- | --- | --- | --- |
 | Third-party stubbing | `WireMock.Net` | 2.18.0 | There is a third-party boundary to stub. Essential for MTD / HMRC submission paths — a real tax authority cannot be called from CI. |
-| Ephemeral database | `Testcontainers.PostgreSql`, `Npgsql` | 4.15.0 / 10.0.3 | The SUT has a database. Matches the PostgreSQL + Kubernetes reality of KEYinfinity. |
-| DB reset between scenarios | `Respawn` | 7.0.0 | There is a database to reset. Deterministic truncate-and-reseed between scenarios instead of per-test transactions. |
+| Ephemeral database | `Testcontainers.PostgreSql`, `Testcontainers.MsSql` | 4.15.0 / 4.15.0 | There is a container-based integration test to run in CI. The drivers (`Npgsql`, `Microsoft.Data.SqlClient`) are already Active in `QAAutomation.Data`; these spin up throwaway PostgreSQL / SQL Server instances to run it against. |
 | Test data generation | `Bogus` | 35.6.5 | Scenarios create their own data. Generated, non-PII test data. |
 | Resilience / polling | `Polly` | 8.8.0 | There is an async back-end state to settle on. **API polling only** — never to paper over a UI race; UI waits go through the Selenium wait helper. |
 | Reporting | `Allure.Reqnroll` | 2.15.0 | Stakeholders need a rich report. Reqnroll's built-in LivingDoc is the lighter option; CI-native test results remain the pass/fail signal of record. |

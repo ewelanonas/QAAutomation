@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\QAAutomation.Core\QAAutomation.Core.csproj" />
     <ProjectReference Include="..\..\src\QAAutomation.Api\QAAutomation.Api.csproj" />
+    <ProjectReference Include="..\..\src\QAAutomation.Data\QAAutomation.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
