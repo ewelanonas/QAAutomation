@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Provider-agnostic database access: the connection-factory seam, the VatReturnRepository
+    "DB class" and the Respawn-based resetter. References Core only. This is the ONE project in
+    the solution that takes a database-driver dependency - Core and UI stay driver-free, which
+    is the whole reason this project exists separately. No test runner, no assertions.
+
+    Programs against System.Data.Common abstractions, so the repository and resetter never name
+    a concrete engine. The connection factory is the only provider-aware seam: Npgsql for
+    PostgreSQL, Microsoft.Data.SqlClient for SQL Server, chosen by DatabaseOptions.Provider.
+  -->
+  <PropertyGroup>
+    <RootNamespace>QAAutomation.Data</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QAAutomation.Core\QAAutomation.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="Respawn" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+</Project>

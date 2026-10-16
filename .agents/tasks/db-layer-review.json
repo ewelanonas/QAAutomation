@@ -1,0 +1,34 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    {
+      "severity": "non-blocking",
+      "blocking": false,
+      "title": "Captive dependency: singleton DatabaseResetter consumes scoped IDatabaseConnectionFactory",
+      "detail": "DataRegistration registers DatabaseResetter as a singleton (to cache the Respawner) but it constructor-injects the scoped IDatabaseConnectionFactory. This is a classic captive dependency. It never materialises in the default run because the only consumer is the [AfterScenario(\"database\")] hook, and every @database scenario is also @ignore; the green build and the 9/0/1 API result confirm the container is not eagerly scope-validated. The lifetimes are exactly what the task contract mandated.",
+      "recommendation": "When a live @database run is enabled, make the stateless factory a singleton (it only holds the singleton DatabaseOptions) or have the resetter open its own scope inside ResetAsync, otherwise MS DI scope validation can throw at resolve time."
+    },
+    {
+      "severity": "non-blocking",
+      "blocking": false,
+      "title": "@database feature-area tag is not in the bdd-gherkin-standards.md taxonomy",
+      "detail": "The example feature uses @database, which is absent from the feature-area tag table in bdd-gherkin-standards.md; that file requires new area tags to be added to the table first. This was explicitly scoped out of the task (steering edits limited to tech-stack.md) and flagged by the coder in the verification note.",
+      "recommendation": "Add @database to the feature-area taxonomy table in bdd-gherkin-standards.md when the DB layer is activated for real."
+    },
+    {
+      "severity": "non-blocking",
+      "blocking": false,
+      "title": "@ignore carries no work-item link tag",
+      "detail": "bdd-gherkin-standards.md requires @ignore to be paired with a work-item link tag (e.g. @issue:KEYINF-1234). The example feature has an explanatory comment but no link tag. The template has no real tracker key, and the task contract specified this exact tag set (@api @regression @database @ignore).",
+      "recommendation": "Add a tracker link tag alongside @ignore (and the matching taxonomy entry) when the scenario is activated against a live database."
+    },
+    {
+      "severity": "informational",
+      "blocking": false,
+      "title": "Build and test numbers were read from the coder's verification note, not independently re-run",
+      "detail": "Per the task's explicit instruction not to re-run dotnet build/test, the green build (0 warnings / 0 errors), clean restore (no NU1008, no NU190x), and API test counts (9 passed / 0 failed / 1 skipped, the @ignore scenario skipped) come from .agents/tasks/db-layer-verification.md. Independent static review corroborates them: no LINQ or using System.Linq, no .Result/.Wait()/.GetAwaiter()/async void/Thread.Sleep in the new project, explicit usings and types throughout, parameterised SQL, OpenAsync returns DbConnection, drivers confined to QAAutomation.Data, UI suite does not reference it, and the System.Security.Cryptography.Pkcs 10.0.13 transitive pin is mechanically sound because CentralPackageTransitivePinningEnabled is true.",
+      "recommendation": "No action required; recorded for traceability."
+    }
+  ],
+  "reviewDoc": "d:\\git\\QAAutomation\\.agents\\tasks/db-layer-review.md"
+}

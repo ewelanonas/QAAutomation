@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using QAAutomation.Api;
 using QAAutomation.Core;
 using QAAutomation.Core.Configuration;
+using QAAutomation.Data;
 using QAAutomation.UI;
 using Reqnroll.Microsoft.Extensions.DependencyInjection;
 
@@ -42,6 +43,11 @@ namespace QAAutomation.Tests.E2E
             services.AddPageObjects();
 
             services.AddApiClients(testConfiguration.Api);
+
+            // Database access for @database scenarios, same as the API suite. Nothing connects
+            // unless a run supplies QAAUTOMATION_Database__ConnectionString and runs a
+            // @database-tagged scenario.
+            services.AddDatabaseAccess(testConfiguration.Database);
 
             services.AddScoped<CrossLayerContext>();
 

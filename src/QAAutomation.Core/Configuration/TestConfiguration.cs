@@ -14,5 +14,12 @@ namespace QAAutomation.Core.Configuration
         public SiteOptions Site { get; set; }
 
         public ArtefactOptions Artefacts { get; set; }
+
+        /// <summary>
+        /// Database connection settings. The loader always fills this, but only the suites that
+        /// opt in (API and E2E) pass it to AddDatabaseAccess, so Core itself stays free of any
+        /// database concept and never registers a driver.
+        /// </summary>
+        public DatabaseOptions Database { get; set; }
     }
 }

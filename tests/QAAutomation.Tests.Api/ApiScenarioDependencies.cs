@@ -3,6 +3,7 @@ using QAAutomation.Api;
 using QAAutomation.Core;
 using QAAutomation.Core.Configuration;
 using QAAutomation.Core.Support;
+using QAAutomation.Data;
 using Reqnroll.Microsoft.Extensions.DependencyInjection;
 
 namespace QAAutomation.Tests.Api
@@ -30,6 +31,11 @@ namespace QAAutomation.Tests.Api
 
             services.AddTestConfiguration(testConfiguration);
             services.AddApiClients(testConfiguration.Api);
+
+            // Database access for @database scenarios. The connection string is empty by default,
+            // so nothing connects unless a run supplies QAAUTOMATION_Database__ConnectionString and
+            // runs a @database-tagged scenario.
+            services.AddDatabaseAccess(testConfiguration.Database);
 
             // One correlation id per scenario, put on every outgoing request by
             // RequestContextHandler so server-side logs can be matched to a scenario run.
